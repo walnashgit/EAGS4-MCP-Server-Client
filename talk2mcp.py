@@ -143,9 +143,17 @@ Examples:
 DO NOT include any explanations or additional text.
 Your entire response should be a single line starting with either FUNCTION_CALL: or FINAL_ANSWER:"""
 
-                query = """Find the ASCII values of characters in INDIA and then take the sum of exponentials of those values. 
-                 Then start keynote app, draw a rectangle of size 300x400 and add the text "MCP server rocks -" and the value that you just calculated. """
+                # query = """Find the ASCII values of characters in INDIA and then take the sum of exponentials of those values. 
+                #  Then start keynote app, draw a rectangle of size 300x400 and add the text "MCP server rocks -" and the value that you just calculated. """
                 # query = """Start keynote app, draw a rectangle of size 300x400 and add the text "MCP server rocks!" """
+                # Get user input for the query
+                print("\nEnter your query (or 'exit' to quit):")
+                query = input("> ")
+                
+                if query.lower() == 'exit':
+                    print("Exiting...")
+                    return
+                    
                 print("Starting iteration loop...")
                 
                 # Use global iteration variables
@@ -185,9 +193,9 @@ Your entire response should be a single line starting with either FUNCTION_CALL:
                         func_name, params = parts[0], parts[1:]
                         
                         print(f"\nDEBUG: Raw function info: {function_info}")
-                        print(f"DEBUG: Split parts: {parts}")
-                        print(f"DEBUG: Function name: {func_name}")
-                        print(f"DEBUG: Raw parameters: {params}")
+                        # print(f"DEBUG: Split parts: {parts}")
+                        # print(f"DEBUG: Function name: {func_name}")
+                        # print(f"DEBUG: Raw parameters: {params}")
                         
                         try:
                             # Find the matching tool to get its input schema
@@ -197,12 +205,12 @@ Your entire response should be a single line starting with either FUNCTION_CALL:
                                 raise ValueError(f"Unknown tool: {func_name}")
 
                             print(f"DEBUG: Found tool: {tool.name}")
-                            print(f"DEBUG: Tool schema: {tool.inputSchema}")
+                            # print(f"DEBUG: Tool schema: {tool.inputSchema}")
 
                             # Prepare arguments according to the tool's input schema
                             arguments = {}
                             schema_properties = tool.inputSchema.get('properties', {})
-                            print(f"DEBUG: Schema properties: {schema_properties}")
+                            # print(f"DEBUG: Schema properties: {schema_properties}")
 
                             for param_name, param_info in schema_properties.items():
                                 if not params:  # Check if we have enough parameters
@@ -211,7 +219,7 @@ Your entire response should be a single line starting with either FUNCTION_CALL:
                                 value = params.pop(0)  # Get and remove the first parameter
                                 param_type = param_info.get('type', 'string')
                                 
-                                print(f"DEBUG: Converting parameter {param_name} with value {value} to type {param_type}")
+                                # print(f"DEBUG: Converting parameter {param_name} with value {value} to type {param_type}")
                                 
                                 # Convert the value to the correct type based on the schema
                                 if param_type == 'integer':
@@ -220,7 +228,7 @@ Your entire response should be a single line starting with either FUNCTION_CALL:
                                     arguments[param_name] = float(value)
                                 elif param_type == 'array':
                                     # Handle array input
-                                    print(f"DEBUG: Handling array arguments")
+                                    # print(f"DEBUG: Handling array arguments")
                                     if isinstance(value, str):
                                         value = value.strip('[]').split(',')
                                     arguments[param_name] = [int(x.strip()) for x in value]
@@ -235,7 +243,7 @@ Your entire response should be a single line starting with either FUNCTION_CALL:
                             
                             # Get the full result content
                             if hasattr(result, 'content'):
-                                print(f"DEBUG: Result has content attribute")
+                                # print(f"DEBUG: Result has content attribute")
                                 # Handle multiple content items
                                 if isinstance(result.content, list):
                                     iteration_result = [
