@@ -1,0 +1,6 @@
+mcp
+python-dotenv
+google-genai
+Pillow
+# pywinauto
+asyncio 
