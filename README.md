@@ -123,6 +123,14 @@ The system provides the following tools:
    - `open_keynote()`: Open Keynote application
    - `draw_rectangle_in_keynote(shapeWidth: int, shapeHeight: int)`: Draw rectangle
    - `add_text_to_keynote_shape(text: str)`: Add text to shape
+  
+## Demo
+
+Watch a demo of the MCP Server with Gemini AI integration in action:
+
+[![MCP Server Demo](https://img.youtube.com/vi/N36YqaE25wA/0.jpg)](https://youtu.be/N36YqaE25wA?si=MQhxSDJhyokvaGUf)
+
+Click the image above to watch the demo video on YouTube. 
 
 ## Error Handling
 
