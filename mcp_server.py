@@ -11,10 +11,15 @@ import sys
 # import win32con
 import time
 import subprocess
+from rich.console import Console
+from rich.panel import Panel
+from fastapi import FastAPI
+from contextlib import asynccontextmanager
 # from win32api import GetSystemMetrics
 
+console = Console()
 # instantiate an MCP server client
-mcp = FastMCP("Calculator")
+mcp = FastMCP("Calculator", settings= {"host": "127.0.0.1", "port": 7172})
 
 # DEFINE TOOLS
 
@@ -115,12 +120,47 @@ def tan(a: int) -> float:
     print("CALLED: tan(a: int) -> float:")
     return float(math.tan(a))
 
+# @mcp.tool()
+# def calculate(expression: str) -> TextContent:
+#     """Calculate the result of an expression"""
+#     console.print("[blue]FUNCTION CALL:[/blue] calculate()")
+#     console.print(f"[blue]Expression:[/blue] {expression}")
+#     try:
+#         result = eval(expression)
+#         console.print(f"[green]Result:[/green] {result}")
+#         return TextContent(
+#             type="text",
+#             text=str(result)
+#         )
+#     except Exception as e:
+#         console.print(f"[red]Error:[/red] {str(e)}")
+#         return TextContent(
+#             type="text",
+#             text=f"Error: {str(e)}"
+#         )
+
 # mine tool
 @mcp.tool()
 def mine(a: int, b: int) -> int:
     """special mining tool"""
     print("CALLED: mine(a: int, b: int) -> int:")
     return int(a - b - b)
+
+# reasoning tool
+@mcp.tool()
+def show_reasoning(steps: list) -> TextContent:
+    """Show the step-by-step reasoning process"""
+    console.print("[blue]FUNCTION CALL:[/blue] show_reasoning()")
+    for i, step in enumerate(steps, 1):
+        console.print(Panel(
+            f"{step}",
+            title=f"Step {i}",
+            border_style="cyan"
+        ))
+    return TextContent(
+        type="text",
+        text="Reasoning shown"
+    )
 
 @mcp.tool()
 def create_thumbnail(image_path: str) -> Image:
@@ -415,6 +455,8 @@ if __name__ == "__main__":
     # Check if running with mcp dev command
     print("STARTING")
     if len(sys.argv) > 1 and sys.argv[1] == "dev":
+        print("STARTING without transport for dev server")
         mcp.run()  # Run without transport for dev server
     else:
+        print("STARTING with stdio for direct execution")
         mcp.run(transport="stdio")  # Run with stdio for direct execution

@@ -123,12 +123,28 @@ The system provides the following tools:
    - `open_keynote()`: Open Keynote application
    - `draw_rectangle_in_keynote(shapeWidth: int, shapeHeight: int)`: Draw rectangle
    - `add_text_to_keynote_shape(text: str)`: Add text to shape
+
+## Prompt Improvements
+
+In this branch, the prompt has been enhanced to be more structured and accurate, incorporating the following properties:
+
+- **Explicit Reasoning**: The prompt encourages clear and logical reasoning in responses.
+- **Structured Output**: Responses are formatted in a way that is easy to read and understand.
+- **Tool Separation**: Different tools and functionalities are clearly delineated for better usability.
+- **Conversation Loop**: The prompt supports an interactive dialogue, allowing for back-and-forth communication.
+- **Instructional Framing**: Instructions are framed in a way that guides the user effectively.
+- **Internal Self-Checks**: The system performs checks to ensure the reasoning process is sound.
+- **Reasoning Type Awareness**: The prompt is aware of different types of reasoning required for various tasks.
+- **Fallbacks**: There are mechanisms in place to handle unexpected inputs or errors gracefully.
+- **Overall Clarity**: The prompt is highly structured and rigorous, making it excellent for guiding LLMs through safe, interpretable, step-by-step reasoning with tool use. There is a strong emphasis on formatting and reasoning discipline.
+
+These improvements aim to enhance the user experience and ensure that the system operates more effectively and safely. 
   
 ## Demo
 
 Watch a demo of the MCP Server with Gemini AI integration in action:
 
-[![MCP Server Demo](https://img.youtube.com/vi/N36YqaE25wA/0.jpg)](https://youtu.be/N36YqaE25wA?si=MQhxSDJhyokvaGUf)
+[![MCP Server Demo](https://img.youtube.com/vi/N36YqaE25wA/0.jpg)](https://youtu.be/k7hyM7cTAQI?si=dp-P8u31oeWYosTy)
 
 Click the image above to watch the demo video on YouTube. 
 
@@ -165,3 +181,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Google Gemini AI for natural language processing capabilities
 - MCP framework for tool management
 - Python community for various libraries used in this project 
+
