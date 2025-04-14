@@ -2,6 +2,9 @@
 from mcp.server.fastmcp import FastMCP, Image
 from mcp.server.fastmcp.prompts import base
 from mcp.types import TextContent
+from mcp.server import Server
+from starlette.routing import Mount, Route
+import uvicorn
 from mcp import types
 from PIL import Image as PILImage
 import math
@@ -13,8 +16,10 @@ import time
 import subprocess
 from rich.console import Console
 from rich.panel import Panel
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from contextlib import asynccontextmanager
+from starlette.applications import Starlette
+from mcp.server.sse import SseServerTransport
 # from win32api import GetSystemMetrics
 
 console = Console()
@@ -451,12 +456,62 @@ def debug_error(error: str) -> list[base.Message]:
         base.AssistantMessage("I'll help debug that. What have you tried so far?"),
     ]
 
+def create_starlette_app(mcp_server: Server, *, debug: bool = False) -> Starlette:
+    """Create a Starlette application that can server the provied mcp server with SSE."""
+    sse = SseServerTransport("/messages/")
+
+    async def handle_sse(request: Request) -> None:
+        async with sse.connect_sse(
+                request.scope,
+                request.receive,
+                request._send,  # noqa: SLF001
+        ) as (read_stream, write_stream):
+            await mcp_server.run(
+                read_stream,
+                write_stream,
+                mcp_server.create_initialization_options(),
+            )
+
+    return Starlette(
+        debug=debug,
+        routes=[
+            Route("/sse", endpoint=handle_sse),
+            Mount("/messages/", app=sse.handle_post_message),
+        ],
+    )
+
+def start_sse():
+    mcp_server = mcp._mcp_server  # noqa: WPS437
+    import argparse
+    from pdb import set_trace
+
+    # set_trace()
+    parser = argparse.ArgumentParser(description='Run MCP SSE-based server')
+    parser.add_argument('--host', default='127.0.0.1', help='Host to bind to')
+    parser.add_argument('--port', type=int, default=7172, help='Port to listen on')
+    args = parser.parse_args()
+    print("SSE args set.")
+
+    # Bind SSE request handling to MCP server
+    starlette_app = create_starlette_app(mcp_server, debug=True)
+
+    uvicorn.run(starlette_app, host=args.host, port=args.port) 
+
 if __name__ == "__main__":
     # Check if running with mcp dev command
     print("STARTING")
-    if len(sys.argv) > 1 and sys.argv[1] == "dev":
-        print("STARTING without transport for dev server")
-        mcp.run()  # Run without transport for dev server
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "dev":
+            print("STARTING without transport for dev server")
+            mcp.run() 
+        elif sys.argv[1] == "sse":
+            sys.argv.remove("sse")
+            print("STARTING sse server")
+            start_sse()
+     # Run without transport for dev server
     else:
         print("STARTING with stdio for direct execution")
-        mcp.run(transport="stdio")  # Run with stdio for direct execution
+        mcp.run(transport="stdio")
+        
+
+ # Run with stdio for direct execution

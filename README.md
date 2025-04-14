@@ -66,14 +66,14 @@ GEMINI_API_KEY=your_api_key_here
 You can start the application in two ways:
 
 ### Option 1: Start Server and Client Separately
-1. Start the MCP server in one terminal:
+1. Start the MCP server in one terminal with sse (default host 127.0.0.1 and port 7172):
 ```bash
-python mcp_server.py
+python mcp_server.py sse
 ```
 
-2. In another terminal, run the client application:
+2. In another terminal, run the client application (it will connect to the started server at the default host and port):
 ```bash
-python talk2mcp.py
+python talk2mcp.py local
 ```
 
 ### Option 2: Start Client Only (Recommended)

@@ -62,17 +62,9 @@ async def main(local: bool):
         print("Establishing connection to MCP server...")
         if local:
             print("connecting with server at localhost...")
-            # async with sse_client("http://127.0.0.1:7171/mcp") as (read, write):
-            #     print("connected with server at localhost...")
-            #     await client_main(read, write)
-            # print("connecting with server at localhost...")
-            # server_params = StdioServerParameters(
-            #     command="uv",
-            #     args=["/Users/avinashkumaragarwal/Me/EAGV1/S5MCP-OpenDesktopApp/venv/bin/uv, args=run,--with,mcp,mcp,run,mcp_server.py"]
-            # )
-            # print("connected with server at localhost...")
-            # async with stdio_client(server_params) as (read, write):
-            #     await client_main(read, write)
+            async with sse_client("http://127.0.0.1:7172/sse") as (read, write):
+                print("connected with server at localhost...")
+                await client_main(read, write)
         else:
             server_params = StdioServerParameters(
                 command="python",
