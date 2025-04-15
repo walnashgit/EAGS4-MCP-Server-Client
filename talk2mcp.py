@@ -54,15 +54,16 @@ def reset_state():
     iteration = 0
     iteration_response = []
 
-async def main(local: bool):
+async def main(local: bool, host: str = "127.0.0.1", port: int = 7172):
     reset_state()  # Reset at the start of main
     print("Starting main execution...")
     try:
         # Create a single MCP server connection
         print("Establishing connection to MCP server...")
         if local:
-            print("connecting with server at localhost...")
-            async with sse_client("http://127.0.0.1:7172/sse") as (read, write):
+            host_port = "http://" + host + ":" + str(port) + "/sse"
+            print(f'connecting with server at {host_port}')
+            async with sse_client(host_port) as (read, write):
                 print("connected with server at localhost...")
                 await client_main(read, write)
         else:
@@ -94,7 +95,7 @@ async def client_main(read, write):
 
         # Create system prompt with available tools
         print("Creating system prompt...")
-        print(f"Number of tools: {len(tools)}")
+        # print(f"Number of tools: {len(tools)}")
         
         try:
             # First, let's inspect what a tool object looks like
@@ -347,7 +348,14 @@ def try_parse_int(x):
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "local":
-        asyncio.run(main(True))
+        import argparse
+        sys.argv.remove("local")
+        parser = argparse.ArgumentParser(description='Run MCP SSE-based server')
+        parser.add_argument('--host', default='127.0.0.1', help='Host to bind to')
+        parser.add_argument('--port', type=int, default=7172, help='Port to listen on')
+        args = parser.parse_args()
+
+        asyncio.run(main(True, args.host, args.port))
     else:
         asyncio.run(main(False))
     

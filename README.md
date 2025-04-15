@@ -70,10 +70,20 @@ You can start the application in two ways:
 ```bash
 python mcp_server.py sse
 ```
+or
+
+```bash
+python mcp_server.py sse --host=127.0.0.2 --port=8383
+```
 
 2. In another terminal, run the client application (it will connect to the started server at the default host and port):
 ```bash
 python talk2mcp.py local
+```
+or
+
+```bash
+python talk2mcp.py local --host=127.0.0.2 --port=8383
 ```
 
 ### Option 2: Start Client Only (Recommended)
