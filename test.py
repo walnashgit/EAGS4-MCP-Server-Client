@@ -1,5 +1,7 @@
 import subprocess
 
+from models.data_model import AddInput, AddListInput, FuntionInfo, ShowReasoningInput
+
 def step1_open_keynote():
     print("Opening keynote")
     apple_script = '''
@@ -76,6 +78,13 @@ def open_keynote():
     else:
         print("Error in Step 1")
 
+def test_playground():
+    # steps = ShowReasoningInput(steps=["1. [arithmetic] First, solve inside parentheses: 2 + 3", "2. [arithmetic] Then multiply the result by 4"])
+    # steps = AddListInput(l=[1,3,2])
+    info = {"func_name":"add","param":AddInput(a=2, b=5)}
+    steps = FuntionInfo(**info)
+    print(steps.model_dump_json())
 
 if __name__ == "__main__":
-    open_keynote()
+    test_playground()
+    # open_keynote()

@@ -9,9 +9,6 @@ from mcp import types
 from PIL import Image as PILImage
 import math
 import sys
-# from pywinauto.application import Application
-# import win32gui
-# import win32con
 import time
 import subprocess
 from rich.console import Console
@@ -20,6 +17,20 @@ from fastapi import FastAPI, Request
 from contextlib import asynccontextmanager
 from starlette.applications import Starlette
 from mcp.server.sse import SseServerTransport
+
+from models.data_model import (
+    AddInput, AddListInput, AddListOutput, AddOutput, CreateThumbnailInput, OpenKeynoteOutput, SubtractInput, SubtractOutput,
+    MultiplyInput, MultiplyOutput, DivideInput, DivideOutput,
+    PowerInput, PowerOutput, SqrtInput, SqrtOutput,
+    CbrtInput, CbrtOutput, FactorialInput, FactorialOutput,
+    LogInput, LogOutput, RemainderInput, RemainderOutput,
+    TrigInput, TrigOutput, MineInput, MineOutput,
+    ShowReasoningInput, StringToAsciiInput, StringToAsciiOutput,
+    ExponentialSumInput, ExponentialSumOutput,
+    FibonacciInput, FibonacciOutput,
+    KeynoteRectangleInput, KeynoteRectangleOutput,
+    KeynoteTextInput, KeynoteTextOutput
+)
 # from win32api import GetSystemMetrics
 
 console = Console()
@@ -32,100 +43,100 @@ app = FastAPI()
 
 #addition tool
 @mcp.tool()
-def add(a: int, b: int) -> int:
+def add(input: AddInput) -> AddOutput:
     """Add two numbers"""
-    print("CALLED: add(a: int, b: int) -> int:")
-    return int(a + b)
+    print("CALLED: add(input: AddInput) -> AddOutput:")
+    return AddOutput(result=(input.a + input.b))
 
 @mcp.tool()
-def add_list(l: list) -> int:
+def add_list(input: AddListInput) -> AddListOutput:
     """Add all numbers in a list"""
-    print("CALLED: add(l: list) -> int:")
-    return sum(l)
+    print("CALLED: add_list(input: AddListInput) -> AddListOutput:")
+    return AddListOutput(result=sum(input.l))
 
 # subtraction tool
 @mcp.tool()
-def subtract(a: int, b: int) -> int:
+def subtract(input: SubtractInput) -> SubtractOutput:
     """Subtract two numbers"""
-    print("CALLED: subtract(a: int, b: int) -> int:")
-    return int(a - b)
+    print("CALLED: subtract(input: SubtractInput) -> SubtractOutput:")
+    return SubtractOutput(result=(input.a - input.b))
 
 # multiplication tool
 @mcp.tool()
-def multiply(a: int, b: int) -> int:
+def multiply(input: MultiplyInput) -> MultiplyOutput:
     """Multiply two numbers"""
-    print("CALLED: multiply(a: int, b: int) -> int:")
-    return int(a * b)
+    print("CALLED: multiply(input: MultiplyInput) -> MultiplyOutput:")
+    return MultiplyOutput(result=(input.a * input.b))
 
 #  division tool
 @mcp.tool() 
-def divide(a: int, b: int) -> float:
+def divide(input: DivideInput) -> DivideOutput:
     """Divide two numbers"""
-    print("CALLED: divide(a: int, b: int) -> float:")
-    return float(a / b)
+    print("CALLED: divide(input: DivideInput) -> DivideOutput:")
+    return DivideOutput(result=(input.a / input.b))
 
 # power tool
 @mcp.tool()
-def power(a: int, b: int) -> int:
+def power(input: PowerInput) -> PowerOutput:
     """Power of two numbers"""
-    print("CALLED: power(a: int, b: int) -> int:")
-    return int(a ** b)
+    print("CALLED: power(input: PowerInput) -> PowerOutput:")
+    return PowerOutput(result=int(input.a ** input.b))
 
 # square root tool
 @mcp.tool()
-def sqrt(a: int) -> float:
+def sqrt(input: SqrtInput) -> SqrtOutput:
     """Square root of a number"""
-    print("CALLED: sqrt(a: int) -> float:")
-    return float(a ** 0.5)
+    print("CALLED: sqrt(input: SqrtInput) -> SqrtOutput:")
+    return SqrtOutput(result=float(input.a ** 0.5))
 
 # cube root tool
 @mcp.tool()
-def cbrt(a: int) -> float:
+def cbrt(input: CbrtInput) -> CbrtOutput:
     """Cube root of a number"""
-    print("CALLED: cbrt(a: int) -> float:")
-    return float(a ** (1/3))
+    print("CALLED: cbrt(input: CbrtInput) -> CbrtOutput:")
+    return CbrtOutput(result=float(input.a ** (1/3)))
 
 # factorial tool
 @mcp.tool()
-def factorial(a: int) -> int:
-    """factorial of a number"""
-    print("CALLED: factorial(a: int) -> int:")
-    return int(math.factorial(a))
+def factorial(input: FactorialInput) -> FactorialOutput:
+    """Factorial of a number"""
+    print("CALLED: factorial(input: FactorialInput) -> FactorialOutput:")
+    return FactorialOutput(result=int(math.factorial(input.a)))
 
 # log tool
 @mcp.tool()
-def log(a: int) -> float:
-    """log of a number"""
-    print("CALLED: log(a: int) -> float:")
-    return float(math.log(a))
+def log(input: LogInput) -> LogOutput:
+    """Log of a number"""
+    print("CALLED: log(input: LogInput) -> LogOutput:")
+    return LogOutput(result=float(math.log(input.a)))
 
 # remainder tool
 @mcp.tool()
-def remainder(a: int, b: int) -> int:
-    """remainder of two numbers divison"""
-    print("CALLED: remainder(a: int, b: int) -> int:")
-    return int(a % b)
+def remainder(input: RemainderInput) -> RemainderOutput:
+    """Remainder of two numbers division"""
+    print("CALLED: remainder(input: RemainderInput) -> RemainderOutput:")
+    return RemainderOutput(result=int(input.a % input.b))
 
 # sin tool
 @mcp.tool()
-def sin(a: int) -> float:
-    """sin of a number"""
-    print("CALLED: sin(a: int) -> float:")
-    return float(math.sin(a))
+def sin(input: TrigInput) -> TrigOutput:
+    """Sin of a number"""
+    print("CALLED: sin(input: TrigInput) -> TrigOutput:")
+    return TrigOutput(result=float(math.sin(input.a)))
 
 # cos tool
 @mcp.tool()
-def cos(a: int) -> float:
-    """cos of a number"""
-    print("CALLED: cos(a: int) -> float:")
-    return float(math.cos(a))
+def cos(input: TrigInput) -> TrigOutput:
+    """Cos of a number"""
+    print("CALLED: cos(input: TrigInput) -> TrigOutput:")
+    return TrigOutput(result=float(math.cos(input.a)))
 
 # tan tool
 @mcp.tool()
-def tan(a: int) -> float:
-    """tan of a number"""
-    print("CALLED: tan(a: int) -> float:")
-    return float(math.tan(a))
+def tan(input: TrigInput) -> TrigOutput:
+    """Tan of a number"""
+    print("CALLED: tan(input: TrigInput) -> TrigOutput:")
+    return TrigOutput(result=float(math.tan(input.a)))
 
 # @mcp.tool()
 # def calculate(expression: str) -> TextContent:
@@ -148,62 +159,63 @@ def tan(a: int) -> float:
 
 # mine tool
 @mcp.tool()
-def mine(a: int, b: int) -> int:
-    """special mining tool"""
-    print("CALLED: mine(a: int, b: int) -> int:")
-    return int(a - b - b)
+def mine(input: MineInput) -> MineOutput:
+    """Special mining tool"""
+    print("CALLED: mine(input: MineInput) -> MineOutput:")
+    return MineOutput(result=int(input.a - input.b - input.b))
 
 # reasoning tool
 @mcp.tool()
-def show_reasoning(steps: list) -> TextContent:
+def show_reasoning(input: ShowReasoningInput) -> TextContent:
     """Show the step-by-step reasoning process"""
     console.print("[blue]FUNCTION CALL:[/blue] show_reasoning()")
-    for i, step in enumerate(steps, 1):
+    for i, step in enumerate(input.steps, 1):
         console.print(Panel(
             f"{step}",
             title=f"Step {i}",
             border_style="cyan"
         ))
-    return TextContent(
-        type="text",
-        text="Reasoning shown"
-    )
+    
+    # Create a TextContent object
+    return TextContent(type="text", text="Reasoning shown")
+    
 
 @mcp.tool()
-def create_thumbnail(image_path: str) -> Image:
+def create_thumbnail(input: CreateThumbnailInput) -> Image:
     """Create a thumbnail from an image"""
     print("CALLED: create_thumbnail(image_path: str) -> Image:")
-    img = PILImage.open(image_path)
+    img = PILImage.open(input.image_path)
     img.thumbnail((100, 100))
+    # return CreateThumbnailOutput(result=Image(data=img.tobytes(), format="png"))
     return Image(data=img.tobytes(), format="png")
 
 @mcp.tool()
-def strings_to_chars_to_int(string: str) -> list[int]:
+def strings_to_chars_to_int(input: StringToAsciiInput) -> StringToAsciiOutput:
     """Return the ASCII values of the characters in a word"""
-    print("CALLED: strings_to_chars_to_int(string: str) -> list[int]:")
-    return [int(ord(char)) for char in string]
+    print("CALLED: strings_to_chars_to_int(input: StringToAsciiInput) -> StringToAsciiOutput:")
+    return StringToAsciiOutput(result=[int(ord(char)) for char in input.string])
 
 @mcp.tool()
-def int_list_to_exponential_sum(int_list: list) -> float:
+def int_list_to_exponential_sum(input: ExponentialSumInput) -> ExponentialSumOutput:
     """Return sum of exponentials of numbers in a list"""
-    print("CALLED: int_list_to_exponential_sum(int_list: list) -> float:")
-    return sum(math.exp(i) for i in int_list)
+    print("CALLED: int_list_to_exponential_sum(input: ExponentialSumInput) -> ExponentialSumOutput:")
+    return ExponentialSumOutput(result=sum(math.exp(i) for i in input.int_list))
 
 @mcp.tool()
-def fibonacci_numbers(n: int) -> list:
+def fibonacci_numbers(input: FibonacciInput) -> FibonacciOutput:
     """Return the first n Fibonacci Numbers"""
-    print("CALLED: fibonacci_numbers(n: int) -> list:")
-    if n <= 0:
-        return []
+    print("CALLED: fibonacci_numbers(input: FibonacciInput) -> FibonacciOutput:")
+    if input.n <= 0:
+        return FibonacciOutput(result=[])
     fib_sequence = [0, 1]
-    for _ in range(2, n):
+    for _ in range(2, input.n):
         fib_sequence.append(fib_sequence[-1] + fib_sequence[-2])
-    return fib_sequence[:n]
+    return FibonacciOutput(result=fib_sequence[:input.n])
 
 @mcp.tool()
-def open_keynote() -> bool:
+def open_keynote() -> OpenKeynoteOutput:
     """Opens the keynote app and creates a new document in the macbook. Returns True if successful, False otherwise."""
-    print("CALLED: open_keynote() -> bool")
+    print("CALLED: open_keynote() -> OpenKeynoteOutput")
     apple_script = '''
     tell application "Keynote"
         activate
@@ -217,23 +229,23 @@ def open_keynote() -> bool:
                             capture_output=True, text=True)
     if result.returncode != 0:
         print("Error:", result.stderr)
-        return False
+        return OpenKeynoteOutput(success = False)
     print("Keynote opened and new document created.")
-    return True
+    return OpenKeynoteOutput(success = True)
 
 @mcp.tool()
-def draw_rectangle_in_keynote(shapeWidth: int, shapeHeight: int) -> bool:
-    """Draws a rectangle in keynote app of the privided size. Returns True if rectangle is drawn successfully, False otherwise."""
-    print("CALLED: draw_rectangle_in_keynote(shapeWidth: int, shapeHeight: int) -> bool")
+def draw_rectangle_in_keynote(input: KeynoteRectangleInput) -> KeynoteRectangleOutput:
+    """Draws a rectangle in keynote app of the provided size. Returns True if rectangle is drawn successfully, False otherwise."""
+    print("CALLED: draw_rectangle_in_keynote(input: KeynoteRectangleInput) -> KeynoteRectangleOutput:")
     apple_script = f'''
     tell application "Keynote"
         tell document 1
             set docWidth to its width
             set docHeight to its height
-            set x to (docWidth - {{{shapeWidth}}}) div 2
-            set y to (docHeight - {{{shapeHeight}}}) div 2
+            set x to (docWidth - {{{input.shapeWidth}}}) div 2
+            set y to (docHeight - {{{input.shapeHeight}}}) div 2
             tell slide 1
-                set newRectangle to make new shape with properties {{position:{{x, y}}, width:{shapeWidth}, height:{shapeHeight}}}
+                set newRectangle to make new shape with properties {{position:{{x, y}}, width:{input.shapeWidth}, height:{input.shapeHeight}}}
             end tell
         end tell
     end tell
@@ -241,20 +253,20 @@ def draw_rectangle_in_keynote(shapeWidth: int, shapeHeight: int) -> bool:
     result = subprocess.run(["osascript", "-e", apple_script],
                             capture_output=True, text=True)
     if result.returncode != 0:
-        print("Step 2 Error:", result.stderr)
-        return False
-    print("Step 2 completed: Rectangle drawn on the slide.")
-    return True
+        print("Draw rectangle error:", result.stderr)
+        return KeynoteRectangleOutput(success=False)
+    print("Rectangle drawn on the slide.")
+    return KeynoteRectangleOutput(success=True)
 
 @mcp.tool()
-def add_text_to_keynote_shape(text: str) -> bool:
+def add_text_to_keynote_shape(input: KeynoteTextInput) -> KeynoteTextOutput:
     """Adds a text to the shape drawn in keynote. Return True if text was added successfully, False otherwise."""
-    print("CALLED: add_text_to_keynote_shape(text: str) -> bool")
+    print("CALLED: add_text_to_keynote_shape(input: KeynoteTextInput) -> KeynoteTextOutput:")
     apple_script = f'''
     tell application "Keynote"
         tell document 1
             tell slide 1
-                set the object text of the shape 1 to "{text}"
+                set the object text of the shape 1 to "{input.text}"
             end tell
         end tell
     end tell
@@ -262,10 +274,10 @@ def add_text_to_keynote_shape(text: str) -> bool:
     result = subprocess.run(["osascript", "-e", apple_script],
                             capture_output=True, text=True)
     if result.returncode != 0:
-        print("Step 3 Error:", result.stderr)
-        return False
-    print("Step 3 completed: Text added to the rectangle.")
-    return True
+        print("Add text error:", result.stderr)
+        return KeynoteTextOutput(success=False)
+    print("Text added to the rectangle.")
+    return KeynoteTextOutput(success=True)
 
 # DEFINE RESOURCES
 
@@ -280,9 +292,9 @@ def get_greeting(name: str) -> str:
 # DEFINE AVAILABLE PROMPTS
 @mcp.prompt()
 def review_code(code: str) -> str:
-    return f"Please review this code:\n\n{code}"
     print("CALLED: review_code(code: str) -> str:")
-
+    return f"Please review this code:\n\n{code}"
+    
 
 @mcp.prompt()
 def debug_error(error: str) -> list[base.Message]:

@@ -10,6 +10,8 @@ import json
 import sys
 from mcp.client.sse import sse_client
 
+from models.data_model import FuntionInfo
+
 # Load environment variables from .env file
 load_dotenv()
 
@@ -80,6 +82,29 @@ async def main(local: bool, host: str = "127.0.0.1", port: int = 7172):
         traceback.print_exc()
     finally:
         reset_state() 
+
+def resolve_ref(ref, schema):
+    """Resolve a $ref in a JSON schema."""
+    parts = ref.strip('#/').split('/')
+    resolved = schema
+    for part in parts:
+        resolved = resolved.get(part, {})
+    return resolved
+
+
+def format_param(name, schema, root_schema):
+    if '$ref' in schema:
+        ref_schema = resolve_ref(schema['$ref'], root_schema)
+        inner_props = ref_schema.get('properties', {})
+        inner_details = []
+        for inner_name, inner_info in inner_props.items():
+            inner_type = inner_info.get('type', 'unknown')
+            inner_details.append(f"{inner_name}:{inner_type}")
+        return f"{name}: {ref_schema.get('title', name)}({', '.join(inner_details)})"
+    else:
+        param_type = schema.get('type', 'unknown')
+        return f"{name}: {param_type}"
+    
         
 async def client_main(read, write):
     print("Connection established, creating session...")
@@ -95,7 +120,6 @@ async def client_main(read, write):
 
         # Create system prompt with available tools
         print("Creating system prompt...")
-        # print(f"Number of tools: {len(tools)}")
         
         try:
             # First, let's inspect what a tool object looks like
@@ -113,10 +137,10 @@ async def client_main(read, write):
                     
                     # Format the input schema in a more readable way
                     if 'properties' in params:
-                        param_details = []
-                        for param_name, param_info in params['properties'].items():
-                            param_type = param_info.get('type', 'unknown')
-                            param_details.append(f"{param_name}: {param_type}")
+                        param_details = [
+                            format_param(param_name, param_info, params)
+                            for param_name, param_info in params['properties'].items()
+                        ]
                         params_str = ', '.join(param_details)
                     else:
                         params_str = 'no parameters'
@@ -156,29 +180,28 @@ If uncertain or a tool fails, attempt a fallback approach and note it.
 📤 Response Format:
 
 Respond with EXACTLY ONE line, and use only one of the formats below (no extra text):
-
 For reasoning step:
-FUNCTION_CALL: {{"name":"show_reasoning", "params":[{{"param": ["1. [arithmetic] First, solve inside parentheses: 2 + 3", "2. [arithmetic] Then multiply the result by 4"]}}]}}
+FUNCTION_CALL: {{"func_name":"show_reasoning", "param":{{"input":{{"steps":["1. [arithmetic] First, solve inside parentheses: 2 + 3", "2. [arithmetic] Then multiply the result by 4"]}}}}}}
 
 For other tool use:
-FUNCTION_CALL: {{"name":"function_name","params":[{{"param":"p1"}},{{"param":"p2"}}]}}
+FUNCTION_CALL: {{"func_name":"function_name","param":{{"input":{{"param1":"value1", "param2":"value2"}}}}}}
 
 For final output:
 FINAL_ANSWER: [answer]
 
 📝 Example Outputs:
 
-FUNCTION_CALL: {{"name":"add","params":[{{"param":"2"}}, {{"param":"3"}}]}}
+FUNCTION_CALL: {{"func_name":"add","param":{{"input":{{"a":2, "b":3}}}}}}
 
 FINAL_ANSWER: [42]
 
 Example:
 Query: Solve (2 + 3) * 4
-Assistant: FUNCTION_CALL: {{"name":"show_reasoning", "params":[{{"param": ["1. [arithmetic] First, solve inside parentheses: 2 + 3", "2. [arithmetic] Then multiply the result by 4"]}}]}}
+Assistant: FUNCTION_CALL: {{"func_name":"show_reasoning", "param":{{"input":{{"steps":["1. [arithmetic] First, solve inside parentheses: 2 + 3", "2. [arithmetic] Then multiply the result by 4"]}}}}}}
 Query: Result is Reasoning shown. What should I do next?
-Assistant: FUNCTION_CALL: {{"name":"add","params":[{{"param":"2"}}, {{"param":"3"}}]}}
+Assistant: FUNCTION_CALL: {{"func_name":"add","param":{{"input":{{"a":2, "b":3}}}}}}
 Query: Result is 5. What should I do next?
-Assistant: FUNCTION_CALL: {{"name":"multiply","params":[{{"param":"5"}}, {{"param":"4"}}]}} 
+Assistant: FUNCTION_CALL: {{"func_name":"multiply","param":{{"input":{{"a":5, "b":4}}}}}}
 User: Result is 20. What should I do next?
 Assistant: FINAL_ANSWER: [20]
 
@@ -239,62 +262,15 @@ FALLBACK: [brief description of the issue and next step]"""
 
             if response_text.startswith("FUNCTION_CALL:"):
                 _, function_info = response_text.split(":", 1)
-                function_info_json = json.loads(function_info)
-                func_name = function_info_json['name']
-                params = function_info_json['params']
-                # parts = [p.strip() for p in function_info.split("|")]
-                # func_name, params = parts[0], parts[1:]
-                
-                # print(f"\nDEBUG: Raw function info: {function_info}")
-                # print(f"DEBUG: Split parts: {parts}")
-                # print(f"DEBUG: Function name: {func_name}")
-                # print(f"DEBUG: Raw parameters: {params}")
-                
                 try:
-                    # Find the matching tool to get its input schema
-                    tool = next((t for t in tools if t.name == func_name), None)
-                    if not tool:
-                        print(f"DEBUG: Available tools: {[t.name for t in tools]}")
-                        raise ValueError(f"Unknown tool: {func_name}")
-
-                    # print(f"DEBUG: Found tool: {tool.name}")
-                    # print(f"DEBUG: Tool schema: {tool.inputSchema}")
-
-                    # Prepare arguments according to the tool's input schema
-                    arguments = {}
-                    schema_properties = tool.inputSchema.get('properties', {})
-                    # print(f"DEBUG: Schema properties: {schema_properties}")
-
-                    for param_name, param_info in schema_properties.items():
-                        if not params:  # Check if we have enough parameters
-                            raise ValueError(f"Not enough parameters provided for {func_name}")
-                            
-                        param = params.pop(0)  # Get and remove the first parameter
-                        value = param['param']
-                        param_type = param_info.get('type', 'string')
-                        
-                        # print(f"DEBUG: Converting parameter {param_name} with value {value} to type {param_type}")
-                        
-                        # Convert the value to the correct type based on the schema
-                        if param_type == 'integer':
-                            arguments[param_name] = int(value)
-                        elif param_type == 'number':
-                            arguments[param_name] = float(value)
-                        elif param_type == 'array':
-                            # Handle array input
-                            # print(f"DEBUG: Handling array arguments")
-                            if isinstance(value, str):
-                                value = value.strip('[]').split(',')
-                            # arguments[param_name] = [int(x.strip()) for x in value]
-                            # arguments[param_name] = [int(x) for x in value]
-                            arguments[param_name] = [try_parse_int(x) for x in value]
-                        else:
-                            arguments[param_name] = str(value)
-
-                    # print(f"DEBUG: Final arguments: {arguments}")
-                    print(f"DEBUG: Calling tool {func_name}")
+                    function_info_json = json.loads(function_info)
+                    func_name = function_info_json.get("func_name")
+                    params = function_info_json.get("param", {})
                     
-                    result = await session.call_tool(func_name, arguments=arguments)
+                    print(f"DEBUG: Calling tool {func_name}")
+                    print(f"DEBUG: Param {params}")
+                    
+                    result = await session.call_tool(func_name, arguments=params)
                     # print(f"DEBUG: Raw result: {result}")
                     
                     # Get the full result content
@@ -321,7 +297,7 @@ FALLBACK: [brief description of the issue and next step]"""
                         result_str = str(iteration_result)
                     
                     iteration_response.append(
-                        f"In the {iteration + 1} iteration you called {func_name} with {arguments} parameters, "
+                        f"In the {iteration + 1} iteration you called {func_name} with {params} parameters, "
                         f"and the function returned {result_str}."
                     )
                     last_response = iteration_result
