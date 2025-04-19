@@ -220,101 +220,105 @@ FALLBACK: [brief description of the issue and next step]"""
         #  Then start keynote app, draw a rectangle of size 300x400 and add the text "MCP server rocks -" and the value that you just calculated. """
         # query = """Start keynote app, draw a rectangle of size 300x400 and add the text "MCP server rocks!" """
         # Get user input for the query
-        print("\nEnter your query (or 'exit' to quit):")
-        query = input("> ")
-        
-        if query.lower() == 'exit':
-            print("Exiting...")
-            return
+        while True:
+            print("\nEnter your query (or 'exit' to quit):")
+            query = input("> ")
             
-        print("Starting iteration loop...")
-        
-        # Use global iteration variables
-        global iteration, last_response
-        
-        while iteration < max_iterations:
-            print(f"\n--- Iteration {iteration + 1} ---")
-            if last_response is None:
-                current_query = query
-            else:
-                current_query = current_query + "\n\n" + " ".join(iteration_response)
-                current_query = current_query + "  What should I do next?"
-
-            # Get model's response with timeout
-            print("Preparing to generate LLM response...")
-            prompt = f"{system_prompt}\n\nQuery: {current_query}"
-            try:
-                response = await generate_with_timeout(client, prompt)
-                response_text = response.text.strip()
-                print(f"LLM Response: {response_text}")
+            if query.lower() == 'exit':
+                print("Exiting...")
+                return
                 
-                # Find the FUNCTION_CALL line in the response
-                for line in response_text.split('\n'):
-                    line = line.strip()
-                    if line.startswith("FUNCTION_CALL:"):
-                        response_text = line
-                        break
-                
-            except Exception as e:
-                print(f"Failed to get LLM response: {e}")
-                break
+            print("Starting iteration loop...")
+            
+            # Use global iteration variables
+            global iteration, last_response
+            
+            while iteration < max_iterations:
+                print(f"\n--- Iteration {iteration + 1} ---")
+                if last_response is None:
+                    current_query = query
+                else:
+                    current_query = current_query + "\n\n" + " ".join(iteration_response)
+                    current_query = current_query + "  What should I do next?"
 
-
-            if response_text.startswith("FUNCTION_CALL:"):
-                _, function_info = response_text.split(":", 1)
+                # Get model's response with timeout
+                print("Preparing to generate LLM response...")
+                prompt = f"{system_prompt}\n\nQuery: {current_query}"
                 try:
-                    function_info_json = json.loads(function_info)
-                    func_name = function_info_json.get("func_name")
-                    params = function_info_json.get("param", {})
+                    response = await generate_with_timeout(client, prompt)
+                    response_text = response.text.strip()
+                    print(f"LLM Response: {response_text}")
                     
-                    print(f"DEBUG: Calling tool {func_name}")
-                    print(f"DEBUG: Param {params}")
+                    # Find the FUNCTION_CALL line in the response
+                    for line in response_text.split('\n'):
+                        line = line.strip()
+                        if line.startswith("FUNCTION_CALL:"):
+                            response_text = line
+                            break
                     
-                    result = await session.call_tool(func_name, arguments=params)
-                    # print(f"DEBUG: Raw result: {result}")
-                    
-                    # Get the full result content
-                    if hasattr(result, 'content'):
-                        # print(f"DEBUG: Result has content attribute")
-                        # Handle multiple content items
-                        if isinstance(result.content, list):
-                            iteration_result = [
-                                item.text if hasattr(item, 'text') else str(item)
-                                for item in result.content
-                            ]
-                        else:
-                            iteration_result = str(result.content)
-                    else:
-                        print(f"DEBUG: Result has no content attribute")
-                        iteration_result = str(result)
-                        
-                    print(f"DEBUG: Final iteration result: {iteration_result}")
-                    
-                    # Format the response based on result type
-                    if isinstance(iteration_result, list):
-                        result_str = f"[{', '.join(iteration_result)}]"
-                    else:
-                        result_str = str(iteration_result)
-                    
-                    iteration_response.append(
-                        f"In the {iteration + 1} iteration you called {func_name} with {params} parameters, "
-                        f"and the function returned {result_str}."
-                    )
-                    last_response = iteration_result
-
                 except Exception as e:
-                    print(f"DEBUG: Error details: {str(e)}")
-                    print(f"DEBUG: Error type: {type(e)}")
-                    import traceback
-                    traceback.print_exc()
-                    iteration_response.append(f"Error in iteration {iteration + 1}: {str(e)}")
+                    print(f"Failed to get LLM response: {e}")
                     break
 
-            elif "FINAL_ANSWER:" in response_text:
-                print("\n=== Agent Execution Complete ===")
-                break
 
-            iteration += 1 # Reset at the end of main
+                if response_text.startswith("FUNCTION_CALL:"):
+                    _, function_info = response_text.split(":", 1)
+                    try:
+                        function_info_json = json.loads(function_info)
+                        func_name = function_info_json.get("func_name")
+                        params = function_info_json.get("param", {})
+                        
+                        print(f"DEBUG: Calling tool {func_name}")
+                        print(f"DEBUG: Param {params}")
+                        
+                        result = await session.call_tool(func_name, arguments=params)
+                        # print(f"DEBUG: Raw result: {result}")
+                        
+                        # Get the full result content
+                        if hasattr(result, 'content'):
+                            # print(f"DEBUG: Result has content attribute")
+                            # Handle multiple content items
+                            if isinstance(result.content, list):
+                                iteration_result = [
+                                    item.text if hasattr(item, 'text') else str(item)
+                                    for item in result.content
+                                ]
+                            else:
+                                iteration_result = str(result.content)
+                        else:
+                            print(f"DEBUG: Result has no content attribute")
+                            iteration_result = str(result)
+                            
+                        print(f"DEBUG: Final iteration result: {iteration_result}")
+                        
+                        # Format the response based on result type
+                        if isinstance(iteration_result, list):
+                            result_str = f"[{', '.join(iteration_result)}]"
+                        else:
+                            result_str = str(iteration_result)
+                        
+                        iteration_response.append(
+                            f"In the {iteration + 1} iteration you called {func_name} with {params} parameters, "
+                            f"and the function returned {result_str}."
+                        )
+                        last_response = iteration_result
+
+                    except Exception as e:
+                        print(f"DEBUG: Error details: {str(e)}")
+                        print(f"DEBUG: Error type: {type(e)}")
+                        import traceback
+                        traceback.print_exc()
+                        iteration_response.append(f"Error in iteration {iteration + 1}: {str(e)}")
+                        break
+
+                elif "FINAL_ANSWER:" in response_text:
+                    print("\n=== Agent Execution Complete ===")
+                    iteration = 0
+                    last_response = None
+                    iteration_response.clear()
+                    break
+
+                iteration += 1 # Reset at the end of main
 
 def try_parse_int(x):
     try:

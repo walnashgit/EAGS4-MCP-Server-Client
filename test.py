@@ -1,3 +1,4 @@
+import json
 import subprocess
 
 from models.data_model import AddInput, AddListInput, FuntionInfo, ShowReasoningInput
@@ -81,8 +82,15 @@ def open_keynote():
 def test_playground():
     # steps = ShowReasoningInput(steps=["1. [arithmetic] First, solve inside parentheses: 2 + 3", "2. [arithmetic] Then multiply the result by 4"])
     # steps = AddListInput(l=[1,3,2])
-    info = {"func_name":"add","param":AddInput(a=2, b=5)}
+    info = """{"func_name":"add","param":{"a":2,"b":3}}"""
+    # info = """{"a":2,"b":3}"""
+    # print(info)
+    # steps = FuntionInfo(**info)
+    # steps = AddInput(a=2, b=4)
+    info = json.loads(info) 
+    # steps = AddInput(**info)
     steps = FuntionInfo(**info)
+    
     print(steps.model_dump_json())
 
 if __name__ == "__main__":
