@@ -94,5 +94,5 @@ def test_playground():
     print(steps.model_dump_json())
 
 if __name__ == "__main__":
-    test_playground()
-    # open_keynote()
+    # test_playground()
+    open_keynote()

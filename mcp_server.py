@@ -234,7 +234,7 @@ def open_keynote() -> OpenKeynoteOutput:
     return OpenKeynoteOutput(success = True)
 
 @mcp.tool()
-def draw_rectangle_in_keynote(input: KeynoteRectangleInput) -> KeynoteRectangleOutput:
+def draw_rectangle_in_keynote(input: KeynoteRectangleInput = KeynoteRectangleInput(shapeHeight=100, shapeWidth=100)) -> KeynoteRectangleOutput:
     """Draws a rectangle in keynote app of the provided size. Returns True if rectangle is drawn successfully, False otherwise."""
     print("CALLED: draw_rectangle_in_keynote(input: KeynoteRectangleInput) -> KeynoteRectangleOutput:")
     apple_script = f'''

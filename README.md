@@ -1,6 +1,6 @@
 # MCP Server with Gemini AI Integration
 
-This project implements a Multi-Component Platform (MCP) server with Gemini AI integration, allowing users to perform various mathematical operations and complex tasks through natural language commands.
+This project implements a Model Context Protocol (MCP) server with Gemini AI integration, allowing users to perform various mathematical operations and complex tasks through natural language commands.
 
 ## Features
 
@@ -56,17 +56,44 @@ GEMINI_API_KEY=your_api_key_here
 
 ## Project Structure
 
+### Core Components
 - `mcp_server.py`: Contains the MCP server implementation and tool definitions
-- `talk2mcp.py`: Client application that interfaces with the MCP server and Gemini AI
+- `models/data_model.py`: Pydantic models for tool inputs and outputs
 - `.env`: Configuration file for API keys
 - `requirements.txt`: Project dependencies
+
+### Client Architecture
+
+The client is built using a modular, four-layer architecture that follows a cognitive workflow:
+
+1. **Perception Layer** (`perception.py`)
+   - Extracts structured information from user input
+   - Identifies objectives, objects, and tool hints
+   - Uses Gemini AI to understand user intent
+
+2. **Memory Layer** (`memory.py`)
+   - Stores and retrieves factual information
+   - Maintains context across the conversation
+   - Provides relevant past information to improve decisions
+
+3. **Decision Layer** (`decision.py`)
+   - Takes perception and memory to generate plans
+   - Determines whether to use tools or provide final answers
+   - Creates structured function calls for tool execution
+
+4. **Action Layer** (`action.py`)
+   - Executes tool calls through the MCP session
+   - Parses function calls and handles errors
+   - Returns structured results for further processing
+
+These layers are orchestrated by the main agent (`agent.py`), which manages the cognitive loop and user interaction.
 
 ## Usage
 
 You can start the application in two ways:
 
 ### Option 1: Start Server and Client Separately
-1. Start the MCP server in one terminal with sse (default host 127.0.0.1 and port 7172):
+1. Start the MCP server in one terminal with SSE (default host 127.0.0.1 and port 7172):
 ```bash
 python mcp_server.py sse
 ```
@@ -76,63 +103,58 @@ or
 python mcp_server.py sse --host=127.0.0.2 --port=8383
 ```
 
-2. In another terminal, run the client application (it will connect to the started server at the default host and port):
+2. In another terminal, run the client application with the new architecture:
 ```bash
-python talk2mcp.py local
+python agent.py local
 ```
 or
 
 ```bash
-python talk2mcp.py local --host=127.0.0.2 --port=8383
+python agent.py local --host=127.0.0.2 --port=8383
 ```
 
 ### Option 2: Start Client Only (Recommended)
 The client application can automatically start the server if it's not already running. Simply run:
 ```bash
-python talk2mcp.py
+python agent.py
 ```
 
 The client will:
 1. Check if the server is running
 2. Start the server if needed
 3. Establish connection automatically
-4. Prompt for your query
+4. Prompt for your preferences and query
 
 ### Using the Application
-1. Enter your query when prompted. Examples:
+1. The system will first ask for some facts about you to establish context.
+2. Enter your query when prompted. Examples:
    - "Add 5 and 3"
    - "Find the ASCII values of characters in INDIA"
    - "Start keynote app and draw a rectangle of size 300x400"
    - "Calculate the factorial of 5"
 
-2. Type 'exit' to quit the application.
+3. The system will:
+   - Perceive your request
+   - Retrieve relevant memories
+   - Make decisions on which tools to use
+   - Take actions and provide results
+   - Continue the conversation until completion
 
-Note: When using Option 2, the server will automatically shut down when you exit the client application.
+4. Type 'exit' to quit the application.
 
-## Available Tools
+## Cognitive Architecture Flow
 
-The system provides the following tools:
+The application follows this processing flow:
 
-1. **Mathematical Tools**
-   - `add(a: int, b: int)`: Add two numbers
-   - `subtract(a: int, b: int)`: Subtract two numbers
-   - `multiply(a: int, b: int)`: Multiply two numbers
-   - `divide(a: int, b: int)`: Divide two numbers
-   - `power(a: int, b: int)`: Calculate power
-   - `sqrt(a: int)`: Calculate square root
-   - `cbrt(a: int)`: Calculate cube root
-   - `factorial(a: int)`: Calculate factorial
-   - `log(a: int)`: Calculate logarithm
-   - `sin(a: int)`, `cos(a: int)`, `tan(a: int)`: Trigonometric functions
+1. **Input** → User's natural language query
+2. **Perception** → Extracts structured information (objectives, entities)
+3. **Memory** → Retrieves relevant past information
+4. **Decision** → Generates plan based on perception and memory
+5. **Action** → Executes tool calls if needed
+6. **Memory Update** → Stores results for future reference
+7. **Loop** → Continues until a final answer is reached
 
-2. **String Processing Tools**
-   - `strings_to_chars_to_int(string: str)`: Convert string to ASCII values
-   - `int_list_to_exponential_sum(int_list: list)`: Calculate sum of exponentials
-
-3. **Keynote Tools**
-   - `open_keynote()`: Open Keynote application
-   - `draw_rectangle_in_keynote(shapeWidth: int, shapeHeight: int)`: Draw rectangle
-   - `add_text_to_keynote_shape(text: str)`: Add text to shape
+This cognitive loop mirrors human decision-making processes, allowing for more contextual and coherent interactions.
 
 ## Prompt Improvements
 
@@ -154,7 +176,7 @@ These improvements aim to enhance the user experience and ensure that the system
 
 Watch a demo of the MCP Server with Gemini AI integration in action:
 
-[![MCP Server Demo](https://img.youtube.com/vi/N36YqaE25wA/0.jpg)](https://youtu.be/k7hyM7cTAQI?si=dp-P8u31oeWYosTy)
+[![MCP Server Demo](https://img.youtube.com/vi/N36YqaE25wA/0.jpg)](https://youtu.be/G1thktyJHnQ)
 
 Click the image above to watch the demo video on YouTube. 
 
@@ -165,6 +187,7 @@ The system includes comprehensive error handling:
 - Type conversion validation
 - Tool availability checking
 - Parameter validation
+- Graceful fallbacks at each layer of the architecture
 
 ## Debugging
 
@@ -173,6 +196,7 @@ Debug information is printed to the console, including:
 - Parameter processing
 - Result formatting
 - Error messages and stack traces
+- Cognitive process flow with timestamped logs
 
 ## Contributing
 
