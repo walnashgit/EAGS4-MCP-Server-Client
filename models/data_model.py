@@ -150,3 +150,8 @@ class KeynoteTextInput(BaseModel):
 
 class KeynoteTextOutput(BaseModel):
     success: bool
+
+class SendEmailInput(BaseModel):
+    recipient_id: str 
+    subject: str 
+    message: str

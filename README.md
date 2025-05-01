@@ -58,6 +58,7 @@ GEMINI_API_KEY=your_api_key_here
 
 ### Core Components
 - `mcp_server.py`: Contains the MCP server implementation and tool definitions
+- `gmail_server.py`: Contains the Gmail MCP server for sending and reading emails.
 - `models/data_model.py`: Pydantic models for tool inputs and outputs
 - `.env`: Configuration file for API keys
 - `requirements.txt`: Project dependencies
@@ -124,6 +125,17 @@ The client will:
 2. Start the server if needed
 3. Establish connection automatically
 4. Prompt for your preferences and query
+
+### Gmail MCP server can be testing directly by running the talk2mcp.py 
+The client application will automatically start the gmail server. Simply run:
+```bash
+python talk2mcp.py
+```
+
+The client will:
+1. Start the gmail server
+2. Establish connection automatically
+3. Prompt for your preferences and query
 
 ### Using the Application
 1. The system will first ask for some facts about you to establish context.

@@ -69,9 +69,13 @@ async def main(local: bool, host: str = "127.0.0.1", port: int = 7172):
                 print("connected with server at localhost...")
                 await client_main(read, write)
         else:
+            # server_params = StdioServerParameters(
+            #     command="python",
+            #     args=["mcp_server.py"]
+            # )
             server_params = StdioServerParameters(
                 command="python",
-                args=["mcp_server.py"]
+                args=["gmail_server.py", "--creds-file-path", "/Users/avinashkumaragarwal/Me/google/gmail.json", "--token-path", "/Users/avinashkumaragarwal/Me/google/token.json"]
             )
             async with stdio_client(server_params) as (read, write):
                 await client_main(read, write)
