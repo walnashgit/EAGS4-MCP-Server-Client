@@ -15,6 +15,9 @@ from models.data_model import FuntionInfo
 # Load environment variables from .env file
 load_dotenv()
 
+GMAIL_CRED_PATH = os.getenv("CREDENTIALS_PATH")
+GMAIL_TOKEN= os.getenv("GMAIL_TOKEN")
+
 # Access your API key and initialize Gemini client correctly
 api_key = os.getenv("GEMINI_API_KEY")
 client = genai.Client(api_key=api_key)
@@ -75,7 +78,7 @@ async def main(local: bool, host: str = "127.0.0.1", port: int = 7172):
             # )
             server_params = StdioServerParameters(
                 command="python",
-                args=["gmail_server.py", "--creds-file-path", "/Users/avinashkumaragarwal/Me/google/gmail.json", "--token-path", "/Users/avinashkumaragarwal/Me/google/token.json"]
+                args=["gmail_server.py", "--creds-file-path", GMAIL_CRED_PATH, "--token-path", GMAIL_TOKEN]
             )
             async with stdio_client(server_params) as (read, write):
                 await client_main(read, write)
